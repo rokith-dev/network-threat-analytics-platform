@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS packets (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    source_ip VARCHAR(45) NOT NULL,
+    destination_ip VARCHAR(45) NOT NULL,
+    protocol VARCHAR(32) NOT NULL,
+    size_bytes INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

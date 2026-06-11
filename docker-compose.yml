@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_NAME: nta_platform
+      DATABASE_USER: nta_user
+      DATABASE_PASSWORD: nta_password
+
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: nta_platform
+      MYSQL_USER: nta_user
+      MYSQL_PASSWORD: nta_password
+      MYSQL_ROOT_PASSWORD: root_password
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
