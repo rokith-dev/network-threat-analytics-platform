@@ -19,7 +19,6 @@ st.set_page_config(
 
 st.title("🌐 Network Threat Analytics Platform")
 
-
 connection = get_connection()
 
 query = """
