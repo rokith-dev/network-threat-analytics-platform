@@ -1,12 +1,21 @@
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root))
+
+from app.detection.port_scan_detector import detect_port_scans
+
 import streamlit as st
 import pandas as pd
 import mysql.connector
 import plotly.express as px
-from app.detection.port_scan_detector import detect_port_scans
 
 
-
+# ==========================================
 # Database Connection
+# ==========================================
+
 def get_connection():
     return mysql.connector.connect(
         host="localhost",
@@ -16,21 +25,26 @@ def get_connection():
     )
 
 
+# ==========================================
 # Page Configuration
+# ==========================================
+
 st.set_page_config(
     page_title="Network Threat Analytics Platform",
     page_icon="🌐",
     layout="wide"
 )
 
-# Title
 st.title("🌐 Network Threat Analytics Platform")
 st.markdown("### Real-Time Network Traffic Analytics Dashboard")
 
-# Connect to Database
+
+# ==========================================
+# Load Data
+# ==========================================
+
 connection = get_connection()
 
-# Load Recent Packets
 query = """
 SELECT *
 FROM packets
@@ -42,14 +56,21 @@ df = pd.read_sql(query, connection)
 
 connection.close()
 
-# Check if data exists
 if df.empty:
     st.warning("No packet data found in the database.")
     st.stop()
 
-# ==========================
+
+# ==========================================
+# Threat Detection
+# ==========================================
+
+port_scan_df = detect_port_scans(df)
+
+
+# ==========================================
 # Metrics Section
-# ==========================
+# ==========================================
 
 total_packets = len(df)
 
@@ -69,11 +90,31 @@ col3.metric("UDP Packets", udp_packets)
 col4.metric("ICMP Packets", icmp_packets)
 col5.metric("Unique Source IPs", unique_ips)
 
+
+# ==========================================
+# Threat Detection Section
+# ==========================================
+
 st.divider()
 
-# ==========================
+st.subheader("🚨 Threat Detection")
+
+if port_scan_df.empty:
+    st.success("No suspicious port scanning detected.")
+else:
+    st.error("Potential Port Scan Detected!")
+
+    st.dataframe(
+        port_scan_df,
+        use_container_width=True
+    )
+
+
+# ==========================================
 # Protocol Distribution
-# ==========================
+# ==========================================
+
+st.divider()
 
 protocol_counts = (
     df["protocol"]
@@ -90,13 +131,17 @@ fig_protocol = px.pie(
     title="Protocol Distribution"
 )
 
-st.plotly_chart(fig_protocol, use_container_width=True)
+st.plotly_chart(
+    fig_protocol,
+    use_container_width=True
+)
+
+
+# ==========================================
+# Top Source IPs
+# ==========================================
 
 st.divider()
-
-# ==========================
-# Top Source IPs
-# ==========================
 
 top_ips = (
     df["source_ip"]
@@ -114,11 +159,12 @@ st.dataframe(
     use_container_width=True
 )
 
-st.divider()
 
-# ==========================
+# ==========================================
 # Top Destination Ports
-# ==========================
+# ==========================================
+
+st.divider()
 
 top_ports = (
     df["destination_port"]
@@ -136,13 +182,17 @@ fig_ports = px.bar(
     title="Most Active Destination Ports"
 )
 
-st.plotly_chart(fig_ports, use_container_width=True)
+st.plotly_chart(
+    fig_ports,
+    use_container_width=True
+)
+
+
+# ==========================================
+# Recent Packets
+# ==========================================
 
 st.divider()
-
-# ==========================
-# Recent Packets Table
-# ==========================
 
 st.subheader("📄 Recent Packet Activity")
 

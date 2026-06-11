@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 def detect_port_scans(df):
 
     suspicious_ips = []
