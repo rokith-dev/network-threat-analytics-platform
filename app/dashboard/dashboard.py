@@ -71,6 +71,10 @@ port_scan_df = detect_port_scans(df)
 
 dos_df = detect_dos(df)
 
+port_scan_count = len(port_scan_df)
+
+dos_count = len(dos_df)
+
 
 # ==========================================
 # Metrics Section
@@ -86,13 +90,21 @@ icmp_packets = len(df[df["protocol"] == "ICMP"])
 
 unique_ips = df["source_ip"].nunique()
 
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
 
 col1.metric("Total Packets", total_packets)
+
 col2.metric("TCP Packets", tcp_packets)
+
 col3.metric("UDP Packets", udp_packets)
+
 col4.metric("ICMP Packets", icmp_packets)
+
 col5.metric("Unique Source IPs", unique_ips)
+
+col6.metric("Port Scan Alerts", port_scan_count)
+
+col7.metric("DoS Alerts", dos_count)
 
 
 # ==========================================
@@ -126,6 +138,32 @@ else:
         use_container_width=True
     )
 
+
+# ==========================================
+# High Risk IPs
+# ==========================================
+
+st.divider()
+
+st.subheader("🔥 High Risk IPs")
+
+high_risk_ips = set()
+
+if not port_scan_df.empty:
+    high_risk_ips.update(port_scan_df["source_ip"])
+
+if not dos_df.empty:
+    high_risk_ips.update(dos_df["source_ip"])
+
+if len(high_risk_ips) == 0:
+    st.success("No high-risk IPs detected.")
+else:
+    st.dataframe(
+        pd.DataFrame(
+            {"High Risk IP": list(high_risk_ips)}
+        ),
+        use_container_width=True
+    )
 
 # ==========================================
 # Protocol Distribution
@@ -228,3 +266,4 @@ st.dataframe(
     use_container_width=True,
     height=500
 )
+
