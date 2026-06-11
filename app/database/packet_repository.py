@@ -1,20 +1,47 @@
-"""Persistence helpers for packet data."""
-
-from dataclasses import dataclass
-from typing import Iterable
+from app.database.db_connection import get_connection
 
 
-@dataclass
-class PacketRecord:
-    source: str
-    destination: str
-    protocol: str
-    size: int
+def save_packet(
+    timestamp,
+    source_ip,
+    destination_ip,
+    source_port,
+    destination_port,
+    protocol,
+    packet_size
+):
 
+    connection = get_connection()
 
-class PacketRepository:
-    def save(self, record: PacketRecord) -> None:
-        return None
+    cursor = connection.cursor()
 
-    def list_recent(self) -> Iterable[PacketRecord]:
-        return []
+    query = """
+    INSERT INTO packets
+    (
+        timestamp,
+        source_ip,
+        destination_ip,
+        source_port,
+        destination_port,
+        protocol,
+        packet_size
+    )
+    VALUES (%s,%s,%s,%s,%s,%s,%s)
+    """
+
+    values = (
+        timestamp,
+        source_ip,
+        destination_ip,
+        source_port,
+        destination_port,
+        protocol,
+        packet_size
+    )
+
+    cursor.execute(query, values)
+
+    connection.commit()
+
+    cursor.close()
+    connection.close()

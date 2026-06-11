@@ -1,16 +1,10 @@
-"""Database connection helpers."""
-
-from dataclasses import dataclass
+import mysql.connector
 
 
-@dataclass
-class DatabaseConfig:
-    host: str = "localhost"
-    port: int = 3306
-    database: str = "nta_platform"
-    user: str = "nta_user"
-    password: str = "nta_password"
-
-
-def get_connection() -> object:
-    return None
+def get_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="root123",
+        database="network_threat_db"
+    )

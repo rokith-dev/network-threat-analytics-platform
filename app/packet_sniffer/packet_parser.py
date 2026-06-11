@@ -1,4 +1,6 @@
 from scapy.layers.inet import IP, TCP, UDP
+from datetime import datetime
+from app.database.packet_repository import save_packet
 
 PROTOCOLS = {
     1: "ICMP",
@@ -16,8 +18,8 @@ def parse_packet(packet):
         protocol_number = packet[IP].proto
         protocol_name = PROTOCOLS.get(protocol_number, str(protocol_number))
 
-        source_port = "N/A"
-        destination_port = "N/A"
+        source_port = 0
+        destination_port = 0
 
         if packet.haslayer(TCP):
             source_port = packet[TCP].sport
@@ -26,6 +28,18 @@ def parse_packet(packet):
         elif packet.haslayer(UDP):
             source_port = packet[UDP].sport
             destination_port = packet[UDP].dport
+
+        timestamp = datetime.now()
+
+        save_packet(
+            timestamp,
+            source_ip,
+            destination_ip,
+            source_port,
+            destination_port,
+            protocol_name,
+            len(packet)
+        )
 
         print("=" * 60)
         print(f"Source IP        : {source_ip}")
