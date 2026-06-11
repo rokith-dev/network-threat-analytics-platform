@@ -11,6 +11,8 @@ import pandas as pd
 import mysql.connector
 import plotly.express as px
 
+from app.detection.dos_detector import detect_dos
+
 
 # ==========================================
 # Database Connection
@@ -67,6 +69,8 @@ if df.empty:
 
 port_scan_df = detect_port_scans(df)
 
+dos_df = detect_dos(df)
+
 
 # ==========================================
 # Metrics Section
@@ -106,6 +110,19 @@ else:
 
     st.dataframe(
         port_scan_df,
+        use_container_width=True
+    )
+
+
+st.subheader("⚠️ DoS Detection")
+
+if dos_df.empty:
+    st.success("No DoS activity detected.")
+else:
+    st.error("Potential DoS Activity Detected!")
+
+    st.dataframe(
+        dos_df,
         use_container_width=True
     )
 
