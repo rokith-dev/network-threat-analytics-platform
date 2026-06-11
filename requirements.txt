@@ -1,1 +1,5 @@
-# Core runtime dependencies can be added here as the implementation grows.
+scapy
+streamlit
+pandas
+plotly
+mysql-connector-python

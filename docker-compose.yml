@@ -1,28 +1,24 @@
 version: '3.9'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: docker/app/Dockerfile
-    depends_on:
-      - mysql
-    environment:
-      DATABASE_HOST: mysql
-      DATABASE_PORT: 3306
-      DATABASE_NAME: nta_platform
-      DATABASE_USER: nta_user
-      DATABASE_PASSWORD: nta_password
 
-  mysql:
+  mysql-db:
     image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
+    container_name: mysql-db
+
     environment:
-      MYSQL_DATABASE: nta_platform
-      MYSQL_USER: nta_user
-      MYSQL_PASSWORD: nta_password
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: network_threat_db
+
     ports:
-      - '3306:3306'
-    volumes:
-      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - "3307:3306"
+
+  streamlit-app:
+    build: .
+    container_name: streamlit-app
+
+    ports:
+      - "8501:8501"
+
+    depends_on:
+      - mysql-db
